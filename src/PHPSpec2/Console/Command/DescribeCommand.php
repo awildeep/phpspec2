@@ -18,19 +18,17 @@ class DescribeCommand extends Command
     public function __construct()
     {
         parent::__construct('describe');
-        
-        
+
         $this->setAliases(array('desc','describe'));
         $this->setName('describe');
         $this->setHelp('Describe - This command will build a new spec file for you (if it does not exist), as well as allow you to add new examples to an existing spec.');
-        
+
         $this->setDefinition(array(
             new InputArgument('spec', InputArgument::REQUIRED, 'Spec to describe'),
             new InputArgument('example', InputArgument::OPTIONAL, 'Example to implement', ''),
             new InputOption('src-path', null, InputOption::VALUE_REQUIRED, 'Source path', 'src'),
             new InputOption('spec-path', null, InputOption::VALUE_REQUIRED, 'Specs path', 'spec'),
             new InputOption('namespace', null, InputOption::VALUE_REQUIRED, 'Specs NS', 'spec\\'),
-            
         ));
     }
 
@@ -63,7 +61,6 @@ class DescribeCommand extends Command
         $namespace = str_replace('/', '\\', dirname(str_replace('\\', DIRECTORY_SEPARATOR, $classname)));
         $class     = basename(str_replace('\\', DIRECTORY_SEPARATOR, $classname));
 
-
         if ($example != '') {
             if (!file_exists($filepath)) {
                 $this->writeSpec ($filepath, $classname, $namespace, $class, $subject, $output);
@@ -77,9 +74,9 @@ class DescribeCommand extends Command
     protected function writeExample ($filepath, $method, $class) 
     {
         $fileContent = file_get_contents($filepath);
+        //Find the currently defined matching function name to help the user in a situation of CASE mismatching
         $currentFunctionLocation = stripos($fileContent, $this->getMethodEscapedNameFor($method));
         if($currentFunctionLocation) {
-            //Find the currently defined matching function name to help the user in a situation of CASE mismatching
             $currentFunctionName = substr($fileContent, $currentFunctionLocation, strlen($this->getMethodEscapedNameFor($method)));
             $this->io->writeln(sprintf('<info>Method <value>"%s"</value> already exists as <value>"%s"</value>; nothing changed.</info>',
                 $this->getMethodEscapedNameFor($method),
@@ -125,7 +122,6 @@ class DescribeCommand extends Command
     protected function writeSpec ($filepath, $classname, $namespace, $class, $subject) 
     {
         if (file_exists($filepath)) {
-        
             $overwrite = $this->io->askConfirmation(sprintf(
                 'File "%s" already exists. Overwrite?', basename($filepath)
             ), false);
