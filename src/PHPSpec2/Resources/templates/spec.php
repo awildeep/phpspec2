@@ -3,6 +3,7 @@
 namespace %namespace%;
 
 use PHPSpec2\ObjectBehavior;
+use PHPSpec2\Exception\Example\PendingException;
 
 class %class% extends ObjectBehavior
 {

@@ -71,9 +71,61 @@ class DescribeCommand extends Command
         }
     }
     
+    protected function checkForUseStatement ($fileContent, $filepath) 
+    {
+        //find if the use statement 'use PHPSpec2\Exception\Example;' is in our spec class.
+        $useStatement = 'use PHPSpec2\Exception\Example\PendingException;';
+        $useExceptionPos = strrpos ($fileContent, $useStatement);
+        if($useExceptionPos === false) {
+            $this->io->writeln(sprintf(
+                '<info>Unable to find required use statement <value>"%s"</value> in <value>"%s"</value>.</info>', 
+                $useStatement,
+                $filepath
+            ), false);
+
+            $insertUse = $this->io->askConfirmation(sprintf(
+                'Would you like to try and insert it?', basename($filepath)
+            ), false);
+
+            if (!$insertUse) {
+                $this->io->writeln(sprintf(
+                    '<info>Unable to find required use statement in <value>"%s"</value>.  Add <value>"%s"</value> to the top of your spec class.</info>', 
+                    $filepath,
+                    $useStatement
+                    ), false);
+
+                return false;
+            } else {
+                $lastUseLocation = strrpos($fileContent, 'use');
+                
+                // var_dump ($lastUseLocation);
+                if($lastUseLocation) {
+                    $fileContent = substr_replace($fileContent, $useStatement."\nuse", $lastUseLocation, 3);
+                } else {
+                    $this->io->writeln(sprintf(
+                        '<info>Unable to to add use statement in <value>"%s"</value>.  Add <value>"%s"</value> to the top of your spec class.</info>', 
+                        $filepath,
+                        $useStatement
+                        ), false);
+
+                    return false;
+                }
+            }
+        }
+        
+        return $fileContent;
+    }
+    
     protected function writeExample ($filepath, $method, $class) 
     {
         $fileContent = file_get_contents($filepath);
+        
+        $fileContent = $this->checkForUseStatement($fileContent, $filepath);
+        if ($fileContent === false) {
+            return 1;
+        }
+        
+        
         //Find the currently defined matching function name to help the user in a situation of CASE mismatching
         $currentFunctionLocation = stripos($fileContent, $this->getMethodEscapedNameFor($method));
         if($currentFunctionLocation) {
