@@ -18,6 +18,8 @@ class DescribeCommand extends Command
     public function __construct()
     {
         parent::__construct('describe');
+        
+        $this->setAliases(array('desc'));
 
         $this->setDefinition(array(
             new InputArgument('spec', InputArgument::REQUIRED, 'Spec to describe'),
